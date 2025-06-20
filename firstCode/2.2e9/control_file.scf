@@ -1,0 +1,260 @@
+{
+	"version" : 1,
+
+  "verbose" : "ON",
+
+  "parser_control" : "DYNAMIC",
+
+	"input_output" :
+	{
+    "input_file_name" : "dipole_aperture.cgns",
+    "output_file_name": "out.cgns",
+    "monitor_file_name": "monitor.smf"
+  },
+
+  "grid" :
+  {
+    "scale_factor"	: 1,
+    "check" : 0
+  },
+
+  "solver_type" : "ELECTROMAGNETICS",   
+  
+  "zone_motion" : "STATIONARY", /* "MFR"*/
+
+  "formulation" : "SCATTERED_FIELD", /*"TOTAL_FIELD"*/
+
+  "iterative_solver" :
+  {
+    "time_stepping"	: "EXPLICIT",
+    "numerical_scheme" : "LAX_WENDROFF", /*RUNGE_KUTTA*/
+    "stage" : 2,
+    "formulation"	: "STEADY" 	
+  },
+
+  "reconstruction_method" : 
+  {
+    "convective_scheme_order" : "SECOND", 
+    "convective_scheme"	: "EULER", 
+    "gradient_method"	: "GREEN_GAUSS", 
+    "limiter_method"	: "NONE",
+    "venkatakrishnan_coefficient" : 3
+  },
+
+  "simulation_control" : 
+  {
+    "number_of_iteration"	: 14680,
+    "update_frequency"	: 733,
+    "number_of_subiteration": 1,
+    "CFL_number"	: 1
+  },
+
+  "boundary_condition" : 
+  [
+    {
+      "labels" : ["FEED"],
+      "bc_type"	: "FEED",
+      "elevation" : 0,
+      "azimuth" : 0,
+      "relative_permeability" : 1,
+      "relative_permittivity" : 1,
+      "wave_frequency" : 2.2e9,
+      "excitation" : "SINUSOIDAL",
+      "amplitude" : 1,
+      "polarization" : "HORIZONTAL"
+    },    
+    {
+      "labels" : ["PEC"],
+      "bc_type" : "PEC"
+    },
+
+    {
+      "labels" : ["FARFIELD"],
+      "bc_type"	: "FARFIELD"
+    }
+  ],
+
+  "initialization" : 
+  [  
+    {
+      "labels" : [""],
+      "electric_field_x" : 0.0,
+      "electric_field_y" : 0.0,
+      "electric_field_z" : 0.0,
+      "magnetic_field_x" : 0.0,
+      "magnetic_field_y" : 0.0,
+      "magnetic_field_z" : 0.0,
+      "relative_permeability" : 1,
+      "relative_permittivity" : 1
+    }/*,
+    {
+      "labels" : ["Dielectric"],
+      "electric_field_x" : 0.0,
+      "electric_field_y" : 0.0,
+      "electric_field_z" : 0.0,
+      "magnetic_field_x" : 0.0,
+      "magnetic_field_y" : 0.0,
+      "magnetic_field_z" : 0.0,
+      "relative_permeability" : 2,
+      "relative_permittivity" : 0.2
+    }*/
+  ],
+
+  "incident_field" :
+  {
+    "elevation" : 0,
+    "azimuth" : 0,
+    "wave_frequency" : 2.2e9,
+    "excitation" : "SINUSOIDAL",
+    "amplitude" : 1,
+    "polarization" : "HORIZONTAL"
+  },
+
+  "monitor" : 
+  {
+    "residue" : 
+    {
+      "norm" : "L2"
+    }
+  },
+
+  "peripheral_operation" :
+  {
+
+    "runtime_post_process" : 
+    {
+
+      "surface_data": 
+      {
+        "distributed" : 
+        [
+          {
+            "surface_type" : "MESH_BOUNDARY",
+            "labels" : ["PEC"],
+            "vectors" : ["surface_current"],
+            "scalars" : ["electric_field_x"],
+            "output_file" : "surf_post",
+            "file_type" : "VTK"
+          },
+          {
+            "surface_type" : "USER_DEFINED",
+            "input_files" : ["ref_sruface.stl"], 
+            "scale_factor" : 1.0,
+            "scalars" : ["electric_field_x"],
+//            "scalars" : ["electric_field_x", "electric_field_y", "electric_field_z", 
+//            "magnetic_field_x", "magnetic_field_y", "magnetic_field_z"],
+            "output_file" : "ref_post",
+            "file_type" : "VTK"
+          }
+        ],
+        "sampling_interval" : 733
+      }
+  /*    ,
+
+      "volume_data" : {
+        "scalars" : ["electric_field_x", "cell_volume", "surface_current"],
+        "file_name" : "myfile.cgns",
+        "file_type" : "CGNS",
+        "sampling_interval" : 733
+      }*/
+    } 
+    ,
+
+    "frequency_domain_analysis" : 
+    {
+      "surface_data": 
+      {
+        "distributed" : 
+        [          
+          /*{
+            "surface_type" : "MESH_BOUNDARY",
+            "labels" : ["FEED_SOURCE"],
+            "vectors" : ["electric_field", "magnetic_field"],
+            "output_file" : "freq_surf_post",
+            "frequency" : 2.2e9,
+            "file_type" : "VTK"
+          },*/
+          {
+            "surface_type" : "USER_DEFINED",
+            "input_files" : ["ref_sruface.stl"], 
+            "scale_factor" : 1.0,
+            "vectors" : ["magnetic_field"],
+//            "scalars" : ["electric_field_x", "electric_field_y", "electric_field_z", 
+//            "magnetic_field_x", "magnetic_field_y", "magnetic_field_z"],
+            "output_file" : "freq_ref_post",
+            "frequency" : 2.2e9,
+            "file_type" : "VTK"
+          }
+        ],
+        "sampling_interval" : 733
+      }
+    }
+    /*, 
+
+    "rcs" :
+    {
+      "reference_boundary" : {
+        "labels" : ["PEC"]
+      },
+
+      "stabilizing_iteration" : 0,
+      "sampling_step" : 1,
+      "output_filename" : "complex_field.txt",
+      "frequencies" : [2.2e9]
+    }
+*/
+  },
+
+  "post_process" :
+  {  
+
+    "volume_data" : {
+      "scalars" : ["electric_field_x", "cell_volume", "surface_current", "permeability", "permittivity"],
+      "file_name" : "myfile.cgns",
+      "file_type" : "CGNS"
+    },
+/*
+    "surface_data": 
+    {
+      "distributed" : 
+      [ 
+        {
+          "surface_type" : "MESH_BOUNDARY",
+          "labels" : ["PEC"],
+          "scalars" : ["electric_field_x"],
+          "output_file" : "surf_post",
+          "file_type" : "VTK"
+        },
+        {
+          "surface_type" : "USER_DEFINED",
+          "input_files" : ["ref_sruface.stl"], 
+          "scale_factor" : 1.0,
+          "scalars" : ["electric_field_x", "electric_field_y", "electric_field_z", 
+          "magnetic_field_x", "magnetic_field_y", "magnetic_field_z"],
+          "output_file" : "ref_post",
+          "file_type" : "VTK"
+        }
+
+      ],
+      "cumulated" : 
+      [
+        {
+          "surface_type" : "MESH_BOUNDARY",
+          "labels" : ["PEC"],
+          "variables" : ["abc"],
+          "file_name" : "mydatafile",
+          "file_type" : "ASCII"
+        }
+      ]
+
+    },
+
+    "user_defined_locations_data" :{
+      "distributed" : [
+      ],
+      cumulated : [
+      ]
+
+    }*/
+  }
+}
